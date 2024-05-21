@@ -1,73 +1,120 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Hướng dẫn xây dựng kiến trúc sạch cho dự án NestJS với Prisma
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### Đầu tiên bài viết được tham khảo từ nguồn đọc này [here](https://betterprogramming.pub/clean-node-js-architecture-with-nestjs-and-typescript-34b9398d790f). Mục đích để xây dựng lại 1 cấu trúc nestjs viết với prisma. Nhằm xây dựng và quản lý project 1 cách hiệu quả trong quá trình xây dựng.
+## TREE 
+<pre>
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+D:.
+├───dist
+│   ├───common
+│   ├───core
+│   │   ├───abstracts
+│   │   ├───prisma
+│   │   ├───repositories
+│   │   └───services
+│   └───modules
+│       └───user-account-status
+│           ├───controllers
+│           ├───dtos
+│           └───services
+├───prisma
+│   └───migrations
+│       └───20240520144202_init
+├───src
+│   ├───common
+│   ├───core
+│   │   ├───abstracts
+│   │   ├───prisma
+│   │   ├───repositories
+│   │   └───services
+│   └───modules
+│       └───user-account-status
+│           ├───controllers
+│           ├───dtos
+│           ├───services
+│           └───tests
+└───test
+</pre>
 
-## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Database demo
 
-## Installation
+<pre>
+generator client {
+  provider = "prisma-client-js"
+}
 
-```bash
-$ yarn install
-```
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
 
-## Running the app
 
-```bash
-# development
-$ yarn run start
+model user_account_status {
+  id           Int           @id @default(autoincrement())
+  code         String        @db.VarChar(50)
+  name         String        @db.VarChar(100)
+  user_account user_account?
+}
 
-# watch mode
-$ yarn run start:dev
+model user_account {
+  id                    Int                 @id @default(autoincrement())
+  username              String              @db.VarChar(50)
+  email                 String              @db.VarChar(50)
+  password              String              @db.VarChar(30)
+  accessToken           String              @db.VarChar(700)
+  refresheToken         String              @db.VarChar(700)
+  user_account_status_id Int                @unique(map: "idUser_account_status")
+  user_account_status   user_account_status @relation(fields: [user_account_status_id], references: [id])
+  user_profile_id       Int @unique
+  user_profile          user_profile        @relation(fields: [user_profile_id], references: [id])
+}
 
-# production mode
-$ yarn run start:prod
-```
+model user_profile {
+  id            Int              @id @default(autoincrement())
+  firstname     String           @db.VarChar(50)
+  lastname      String           @db.VarChar(50)
+  fullname      String           @db.VarChar(100)
+  email         String           @db.VarChar(50)
+  time_zone     String           @db.VarChar(100)
+  google_account google_account?
+  user_account   user_account?
+}
 
-## Test
+model google_account {
+  user_profile_id    Int          @id
+  google_account_id  String       @db.VarChar(100)
+  user_profile       user_profile @relation(fields: [user_profile_id], references: [id])
+}
 
-```bash
-# unit tests
-$ yarn run test
+</pre>
 
-# e2e tests
-$ yarn run test:e2e
 
-# test coverage
-$ yarn run test:cov
-```
+## Sơ đồ 
 
-## Support
+- Đây là một ví dụ về cách triển khai nguyên tắc thiết kế kiến trúc sạch (clean architecture) trong dự án NestJS kết hợp với Prisma:
+  
+![alt text](image.png)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Stay in touch
+### 1. IGenericRepository và GenericRepository:
+   
+    - IGenericRepository là một abstract class đại diện cho một repository chung có các phương thức cơ bản như getAll, get, create, update, và delete.
+    - GenericRepository là một implementation của IGenericRepository, cung cấp các phương thức cơ bản cho việc tương tác với cơ sở dữ liệu bằng cách sử dụng Prisma.
+  
+### 2. IDataServices:
+    - IDataServices là một abstract class đại diện cho các dịch vụ dữ liệu (data services) trong ứng dụng, bao gồm các repository chung như user_account_status, user_account, user_profile, và google_account.
+    - Các dịch vụ này được khai báo với kiểu dữ liệu là GenericRepository, cho phép chúng ta sử dụng các phương thức cơ bản từ IGenericRepository.
+  
+### 3. DataService:
+    - DataService là một implementation của IDataServices, cung cấp các dịch vụ dữ liệu cụ thể cho ứng dụng.
+    - Trong constructor của DataService, chúng ta khởi tạo các repository cụ thể bằng cách sử dụng GenericRepository, và cung cấp cho chúng thông qua PrismaService.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Nguyên tắc chính:
+    - Phân tách lớp trừu tượng và lớp cụ thể: IGenericRepository là lớp trừu tượng đại diện cho một repository chung, trong khi GenericRepository là lớp cụ thể thực hiện các phương thức cụ thể cho repository đó.
+    - Độc lập với cơ sở dữ liệu và bên ngoài: GenericRepository được thiết kế để hoạt động độc lập với cơ sở dữ liệu cụ thể, cho phép thay đổi cơ sở dữ liệu một cách dễ dàng nếu cần thiết.
+    - Sử dụng dependency injection: DataService sử dụng dependency injection để chuyển các repository vào bên trong nó, giúp tạo ra các dịch vụ dữ liệu một cách linh hoạt và dễ mở rộng.
 
-## License
 
-Nest is [MIT licensed](LICENSE).
+
+## Cảm ơn đã xem! Rất mong được nhận được start và phản hồi từ bạn!
