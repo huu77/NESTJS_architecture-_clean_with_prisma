@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+model user_account_status {
+  id           Int           @id @default(autoincrement())
+  code         String        @db.VarChar(50)
+  name         String        @db.VarChar(100)
+  user_account user_account?
+}
+
+model user_account {
+  id                    Int                 @id @default(autoincrement())
+  username              String              @db.VarChar(50)
+  email                 String              @db.VarChar(50)
+  password              String              @db.VarChar(30)
+  accessToken           String              @db.VarChar(700)
+  refresheToken         String              @db.VarChar(700)
+  user_account_status_id Int                @unique(map: "idUser_account_status")
+  user_account_status   user_account_status @relation(fields: [user_account_status_id], references: [id])
+  user_profile_id       Int @unique
+  user_profile          user_profile        @relation(fields: [user_profile_id], references: [id])
+}
+
+model user_profile {
+  id            Int              @id @default(autoincrement())
+  firstname     String           @db.VarChar(50)
+  lastname      String           @db.VarChar(50)
+  fullname      String           @db.VarChar(100)
+  email         String           @db.VarChar(50)
+  time_zone     String           @db.VarChar(100)
+  google_account google_account?
+  user_account   user_account?
+}
+
+model google_account {
+  user_profile_id    Int          @id
+  google_account_id  String       @db.VarChar(100)
+  user_profile       user_profile @relation(fields: [user_profile_id], references: [id])
+}
