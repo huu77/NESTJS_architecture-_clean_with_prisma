@@ -1,6 +1,12 @@
 # Hướng dẫn xây dựng kiến trúc sạch cho dự án NestJS với Prisma
 
 ### Đầu tiên bài viết được tham khảo từ nguồn đọc này [here](https://betterprogramming.pub/clean-node-js-architecture-with-nestjs-and-typescript-34b9398d790f). Mục đích để xây dựng lại 1 cấu trúc nestjs viết với prisma. Nhằm xây dựng và quản lý project 1 cách hiệu quả trong quá trình xây dựng.
+
+### INSTALL
+<pre>
+  yarn 
+  yarn dev
+</pre>
 ## TREE 
 <pre>
 

@@ -33,7 +33,7 @@ model user_profile {
   firstname     String           @db.VarChar(50)
   lastname      String           @db.VarChar(50)
   fullname      String           @db.VarChar(100)
-  email         String           @db.VarChar(50)
+  email         String           @unique @db.VarChar(50)
   time_zone     String           @db.VarChar(100)
   google_account google_account?
   user_account   user_account?
