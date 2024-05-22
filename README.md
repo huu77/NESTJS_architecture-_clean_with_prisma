@@ -123,4 +123,4 @@ model google_account {
 
 
 
-## Cảm ơn đã xem! Rất mong được nhận được start và phản hồi từ bạn!
+## Cảm ơn đã xem! Rất mong được nhận được star và phản hồi từ bạn!
